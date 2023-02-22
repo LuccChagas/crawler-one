@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/LuccChagas/crawler-one/config"
 	"github.com/gocolly/colly"
 )
 
@@ -14,12 +13,12 @@ type CrawlerImpl interface {
 }
 
 type CrawlerConstructor struct {
-	args *config.Args
+	args *Args
 }
 
-func NewCrawlerConstructor(arg *config.Args) CrawlerImpl {
+func NewCrawlerConstructor(arg *Args) CrawlerImpl {
 	return &CrawlerConstructor{
-		args: &config.Args{
+		args: &Args{
 			Url:    arg.Url,
 			Source: arg.Source,
 		},
