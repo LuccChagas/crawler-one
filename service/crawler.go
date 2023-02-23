@@ -26,50 +26,55 @@ func NewCrawlerConstructor(arg *Args) CrawlerImpl {
 	}
 }
 
-func NewCollector() *colly.Collector {
-
+func NewCollector() (*colly.Collector, error) {
 	c := colly.NewCollector(
 		colly.MaxDepth(2),
 		colly.Async(true),
 	)
 
-	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 2})
+	err := c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 4})
+	if err != nil {
+		return nil, err
+	}
 
-	return c
+	return c, nil
 }
 
 //TODO: O rastreador deve ser uma ferramenta de linha de comando que aceita um URL inicial e um diretório de destino.
 func (cc *CrawlerConstructor) NewCrawler(c *colly.Collector, args *Args) {
+	var u string
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		// Pega o link dentro do href
 		link := e.Attr("href")
-
-		// fmt.Printf("Link found: %q -> %s\n", e.Text, link)
-
-		// visita o link dentro da pagina encontrada
 		e.Request.Visit(link)
 
-		//TODO: salvar conteudo do body do link no diretorio recebido
-		SaveContent(e.Request, e.Response, args)
+		SaveContent(u, e.Response, args)
 	})
 
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting ->", r.URL.String())
+		u = fmt.Sprint(r.URL.String())
+
 	})
 
 	c.Visit(args.Url)
 	c.Wait()
 }
 
-func SaveContent(req *colly.Request, resp *colly.Response, args *Args) error {
+func SaveContent(visiting string, resp *colly.Response, args *Args) error {
 	dir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fileName := util.SanitizeUrlFileName(req.URL.String())
-	file := util.CheckAndFileCreation(fileName, resp.Body)
+	fileName := util.SanitizeUrlFileName(visiting)
+	if err != nil {
+		return err
+	}
+	file, err := util.CheckAndFileCreation(fileName, resp.Body)
+	if err != nil {
+		return nil
+	}
 
 	if err := os.Rename(
 		fmt.Sprintf("%s/%s", dir, file.Name()),
