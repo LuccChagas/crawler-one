@@ -79,7 +79,10 @@ func StartCrawler(cCtx *cli.Context) error {
 			log.Printf("Folder '%s' was created with success", arg.Source)
 		}
 	}
-	c := NewCollector()
+	c, err := NewCollector()
+	if err != nil {
+		log.Fatal(err)
+	}
 	cc := NewCrawlerConstructor(arg)
 	cc.NewCrawler(c, arg)
 
