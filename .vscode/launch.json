@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "./main.go",
-            "args": ["--url=https://pt.wikipedia.org/wiki/Wikipédia", "-s=/Users/luccas/dummyfolder"]
+            "args": ["--url=https://wiki.hackerspaces.org/", "-s=/Users/luccas/dummyfolder", "start"]
 
         }
     ]
